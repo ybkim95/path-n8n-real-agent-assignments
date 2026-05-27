@@ -1,0 +1,642 @@
+{
+  "name": "PATH HW1 REAL - AI Agent Team and Tools",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## HW1: Real AI Agent team\n\nLearning objective:\nBuild a real multi-agent workflow in n8n using AI Agent nodes, model nodes, and tool nodes.\n\nTask:\nCreate a weekly \"AI Study Digest\" for community college students.\n\nRequired:\n- Researcher Agent with a search-like tool\n- Writer Agent\n- Critic Agent\n- Revision Agent\n- deterministic IF route\n\nCode nodes are only prompt builders / parsers. They are not agents.\n\nBefore running:\nAdd your OpenAI credential to each Chat Model node.",
+        "height": 420,
+        "width": 640,
+        "color": 4
+      },
+      "id": "hw1-real-brief",
+      "name": "Assignment Brief",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1040,
+        -420
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## What students must show\n\nComplete:\n- At least 3 AI Agent nodes\n- Each agent has a Chat Model\n- Researcher has at least one tool\n- Critic output routes approve vs revise\n\nReflection:\n- What does each agent do?\n- Which tool belongs to which agent?\n- Which nodes are deterministic and why?",
+        "height": 320,
+        "width": 560,
+        "color": 6
+      },
+      "id": "hw1-real-rubric",
+      "name": "Rubric",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        860,
+        -420
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "hw1-real-manual",
+      "name": "Manual Trigger",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -1000,
+        140
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "hw1-real-config-field-0",
+              "name": "topic",
+              "value": "AI tools and study strategies useful for community college students",
+              "type": "string"
+            },
+            {
+              "id": "hw1-real-config-field-1",
+              "name": "audience",
+              "value": "students new to AI agents",
+              "type": "string"
+            },
+            {
+              "id": "hw1-real-config-field-2",
+              "name": "digest_length",
+              "value": "250 words",
+              "type": "string"
+            },
+            {
+              "id": "hw1-real-config-field-3",
+              "name": "chatInput",
+              "value": "Research 3 practical AI study tools or strategies for community college students. Return concise bullet points with benefits, cautions, and suggested use.",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "hw1-real-config",
+      "name": "Assignment Config - edit me",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -760,
+        140
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.chatInput }}",
+        "options": {
+          "systemMessage": "You are the Researcher Agent. Use your tools when useful. Return structured notes with: finding, why it matters, caution, and source/tool used. Do not write the final digest."
+        }
+      },
+      "id": "hw1-real-researcher",
+      "name": "Researcher Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2,
+      "position": [
+        -500,
+        140
+      ]
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4.1-mini"
+        },
+        "options": {}
+      },
+      "id": "hw1-real-research-model",
+      "name": "Chat Model - Researcher",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        -520,
+        370
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "hw1-real-wiki",
+      "name": "Wikipedia Tool - Researcher",
+      "type": "@n8n/n8n-nodes-langchain.toolWikipedia",
+      "typeVersion": 1,
+      "position": [
+        -380,
+        370
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "hw1-real-research-think",
+      "name": "Think Tool - Researcher",
+      "type": "@n8n/n8n-nodes-langchain.toolThink",
+      "typeVersion": 1,
+      "position": [
+        -240,
+        370
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const research = $input.first().json.output || JSON.stringify($input.first().json);\nreturn [{\n  json: {\n    research,\n    chatInput: [\n      \"Use the research notes below to write a student-facing AI Study Digest.\",\n      \"Audience: community college students new to AI agents.\",\n      \"Requirements: plain language, 3 useful items, one caution section, no fake citations.\",\n      \"\",\n      research\n    ].join(\"\\n\")\n  }\n}];"
+      },
+      "id": "hw1-real-writer-prompt",
+      "name": "Build Writer Prompt",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -240,
+        140
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.chatInput }}",
+        "options": {
+          "systemMessage": "You are the Writer Agent. Your only job is to turn research notes into a clear digest. Do not invent new facts. Keep the tone encouraging and concrete."
+        }
+      },
+      "id": "hw1-real-writer",
+      "name": "Writer Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2,
+      "position": [
+        20,
+        140
+      ]
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4.1-mini"
+        },
+        "options": {}
+      },
+      "id": "hw1-real-writer-model",
+      "name": "Chat Model - Writer",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        370
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "hw1-real-writer-think",
+      "name": "Think Tool - Writer",
+      "type": "@n8n/n8n-nodes-langchain.toolThink",
+      "typeVersion": 1,
+      "position": [
+        140,
+        370
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const draft = $input.first().json.output || JSON.stringify($input.first().json);\nreturn [{\n  json: {\n    draft,\n    chatInput: [\n      \"Review this draft using the rubric.\",\n      \"Rubric: useful to students, clear role separation, no fake sources, includes cautions, about 250 words.\",\n      \"Start your response with exactly APPROVE or REVISE.\",\n      \"If REVISE, list specific fixes.\",\n      \"\",\n      draft\n    ].join(\"\\n\")\n  }\n}];"
+      },
+      "id": "hw1-real-critic-prompt",
+      "name": "Build Critic Prompt",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        280,
+        140
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.chatInput }}",
+        "options": {
+          "systemMessage": "You are the Critic Agent. You do not rewrite the digest unless asked. Judge quality using the rubric. Start with APPROVE or REVISE."
+        }
+      },
+      "id": "hw1-real-critic",
+      "name": "Critic Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2,
+      "position": [
+        540,
+        140
+      ]
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4.1-mini"
+        },
+        "options": {}
+      },
+      "id": "hw1-real-critic-model",
+      "name": "Chat Model - Critic",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        520,
+        370
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "hw1-real-critic-think",
+      "name": "Think Tool - Critic",
+      "type": "@n8n/n8n-nodes-langchain.toolThink",
+      "typeVersion": 1,
+      "position": [
+        660,
+        370
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "hw1-real-critic-calc",
+      "name": "Calculator Tool - Critic",
+      "type": "@n8n/n8n-nodes-langchain.toolCalculator",
+      "typeVersion": 1,
+      "position": [
+        800,
+        370
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": false,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "hw1-real-if-condition",
+              "leftValue": "={{ $json.output }}",
+              "rightValue": "REVISE",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "hw1-real-if",
+      "name": "Needs Revision?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        800,
+        140
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const critic = $input.first().json.output || \"\";\nconst draft = $(\"Build Critic Prompt\").first().json.draft;\nreturn [{\n  json: {\n    critic,\n    draft,\n    chatInput: [\n      \"Revise the digest using the critic feedback.\",\n      \"Keep the same topic and audience.\",\n      \"Critic feedback:\",\n      critic,\n      \"\",\n      \"Original draft:\",\n      draft\n    ].join(\"\\n\")\n  }\n}];"
+      },
+      "id": "hw1-real-revision-prompt",
+      "name": "Build Revision Prompt",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1060,
+        40
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.chatInput }}",
+        "options": {
+          "systemMessage": "You are the Revision Agent. Improve the draft based only on critic feedback. Keep it safe, plain, and useful."
+        }
+      },
+      "id": "hw1-real-revision",
+      "name": "Revision Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2,
+      "position": [
+        1320,
+        40
+      ]
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4.1-mini"
+        },
+        "options": {}
+      },
+      "id": "hw1-real-revision-model",
+      "name": "Chat Model - Revision",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        1300,
+        270
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "hw1-real-revision-think",
+      "name": "Think Tool - Revision",
+      "type": "@n8n/n8n-nodes-langchain.toolThink",
+      "typeVersion": 1,
+      "position": [
+        1440,
+        270
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const critic = $input.first().json.output || \"\";\nconst draft = $(\"Build Critic Prompt\").first().json.draft;\nreturn [{ json: { final_draft: draft, critic_review: critic, revision_made: false } }];"
+      },
+      "id": "hw1-real-approved",
+      "name": "Approved Draft Packet",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1060,
+        260
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const item = $input.first().json;\nreturn [{\n  json: {\n    assignment: \"HW1 REAL - AI Agent Team and Tools\",\n    final_output: item.output || item.final_draft,\n    revision_made: Boolean(item.output),\n    required_agent_nodes: [\"Researcher Agent\", \"Writer Agent\", \"Critic Agent\", \"Revision Agent\"],\n    required_tools: [\"Wikipedia Tool - Researcher\", \"Think Tools\", \"Calculator Tool - Critic\"],\n    reflection_questions: [\n      \"Which agent used a tool, and why?\",\n      \"Which node was deterministic, and why was that better than AI?\",\n      \"What was passed from Researcher to Writer?\"\n    ]\n  }\n}];"
+      },
+      "id": "hw1-real-final",
+      "name": "Final Packet - submit this",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1600,
+        140
+      ]
+    }
+  ],
+  "connections": {
+    "Manual Trigger": {
+      "main": [
+        [
+          {
+            "node": "Assignment Config - edit me",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Assignment Config - edit me": {
+      "main": [
+        [
+          {
+            "node": "Researcher Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Chat Model - Researcher": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Researcher Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wikipedia Tool - Researcher": {
+      "ai_tool": [
+        [
+          {
+            "node": "Researcher Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Think Tool - Researcher": {
+      "ai_tool": [
+        [
+          {
+            "node": "Researcher Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Researcher Agent": {
+      "main": [
+        [
+          {
+            "node": "Build Writer Prompt",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Writer Prompt": {
+      "main": [
+        [
+          {
+            "node": "Writer Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Chat Model - Writer": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Writer Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Think Tool - Writer": {
+      "ai_tool": [
+        [
+          {
+            "node": "Writer Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Writer Agent": {
+      "main": [
+        [
+          {
+            "node": "Build Critic Prompt",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Critic Prompt": {
+      "main": [
+        [
+          {
+            "node": "Critic Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Chat Model - Critic": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Critic Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Think Tool - Critic": {
+      "ai_tool": [
+        [
+          {
+            "node": "Critic Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Calculator Tool - Critic": {
+      "ai_tool": [
+        [
+          {
+            "node": "Critic Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Critic Agent": {
+      "main": [
+        [
+          {
+            "node": "Needs Revision?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Needs Revision?": {
+      "main": [
+        [
+          {
+            "node": "Build Revision Prompt",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Approved Draft Packet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Revision Prompt": {
+      "main": [
+        [
+          {
+            "node": "Revision Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Chat Model - Revision": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Revision Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Think Tool - Revision": {
+      "ai_tool": [
+        [
+          {
+            "node": "Revision Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Revision Agent": {
+      "main": [
+        [
+          {
+            "node": "Final Packet - submit this",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Approved Draft Packet": {
+      "main": [
+        [
+          {
+            "node": "Final Packet - submit this",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": [],
+  "triggerCount": 0,
+  "updatedAt": "2026-05-27T16:41:42.750Z",
+  "versionId": "path-real-agent-v4"
+}
